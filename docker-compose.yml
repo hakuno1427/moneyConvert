@@ -38,14 +38,6 @@ services:
         networks:
             - laravel
 
-    composer:
-        image: composer:latest
-        container_name: laravel-app-composer
-        volumes:
-            - ./src/:/app
-        networks:
-            - laravel
-
 networks:
     laravel:
         driver: bridge

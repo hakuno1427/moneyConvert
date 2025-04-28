@@ -4,37 +4,56 @@ namespace App\Http\Controllers;
 
 use App\Services\CurrencyService;
 use Illuminate\Http\Request;
+use App\Repositories\CurrencyRepository;
 
 class CurrencyController extends Controller
 {
+    protected $currencyRepo;
     protected $currencyService;
     protected $currencies;
-    protected $baseCurrency;
 
-    public function __construct(CurrencyService $currencyService)
+    public function __construct(CurrencyRepository $currencyRepo, CurrencyService $currencyService)
     {
+        $this->currencyRepo = $currencyRepo;
+        $this->currencies = $currencyRepo->getAll();
         $this->currencyService = $currencyService;
-        $this->currencies = config('currencies.targets');
-        $this->baseCurrency = config('currencies.base');
     }
 
     public function index()
     {
-        return view('index', [
-            'currencies' => $this->currencies,
-        ]);
+        $currencies = $this->currencies;
+        return view('index', compact('currencies'));
     }
 
-    public function getLatest()
+    protected function getLatestUSDRates()
     {
-        $currencySymbol = array_column($this->currencies, 'currency');
+        $currencies = $this->currencies;
+        $currency_codes = $currencies->pluck('code')->toArray();
 
-        $rates = $this->currencyService->getLatestRates($currencySymbol, $this->baseCurrency)['rates'];
+        $rates = $this->currencyService->getLatestRates($currency_codes)['rates'];
 
         if (!$rates) {
             return response()->json(['error' => 'Unable to fetch rates.'], 500);
         }
 
-        return response()->json($rates);
+        return $rates;
+    }
+
+    public function getRates()
+    {
+        $USDRates = $this->getLatestUSDRates();
+
+        $usdToBase = $USDRates[$this->currencyRepo->getBaseCurrency()->code];
+
+        $conversionRate = [];
+        foreach ($this->currencies as $currency) {
+
+            if ($currency->code == $usdToBase) {
+                continue;
+            }
+            $conversionRate[$currency->code] = $USDRates[$currency->code] / $usdToBase;
+        }
+
+        return response()->json($conversionRate);
     }
 }

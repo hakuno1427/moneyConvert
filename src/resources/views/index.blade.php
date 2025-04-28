@@ -13,8 +13,8 @@
 
     <div class="flex items-center border rounded-lg mb-6 overflow-hidden">
         <div class="flex items-center bg-white px-4 flex-shrink-0">
-            <img src="https://flagcdn.com/w640/au.png" alt="AUD" class="w-6 h-6 mr-2">
-            <span class="font-semibold">AUD</span>
+            <img id="base-flag" src="" alt="Base" class="w-6 h-6 mr-2">
+            <span id="base-code" class="font-semibold"></span>
         </div>
         <input id="amount" type="number" value="1000" class="flex-1 p-4 focus:outline-none border-0 min-w-0">
         <button id="convert-btn" class="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center p-4 rounded-r-lg transition duration-200">
@@ -23,8 +23,6 @@
             </svg>
         </button>
     </div>
-
-
 
     <!-- Spinner -->
     <div id="spinner" class="flex justify-center my-6 hidden">
@@ -39,9 +37,11 @@
 
 <script>
     const currencies = @json($currencies);
+    const baseCurrency = currencies.find(c => c.is_base); // Get base
     let latestRates = {};
 
     document.addEventListener('DOMContentLoaded', () => {
+        setupBaseCurrency();
         fetchRates(1000);
 
         document.getElementById('convert-btn').addEventListener('click', () => {
@@ -50,14 +50,22 @@
         });
     });
 
+    function setupBaseCurrency() {
+        if (baseCurrency) {
+            const countryCode = (baseCurrency.country_code || 'UN').toLowerCase();
+            document.getElementById('base-flag').src = `https://flagcdn.com/w40/${countryCode}.png`;
+            document.getElementById('base-code').textContent = baseCurrency.code;
+        }
+    }
+
     function fetchRates(amount) {
         const spinner = document.getElementById('spinner');
         const list = document.getElementById('currency-list');
 
         spinner.classList.remove('hidden');
-        list.classList.add('opacity-50'); // dim while loading
+        list.classList.add('opacity-50');
 
-        fetch(`api/getLatest`)
+        fetch('/getRates') // <-- Fix here: add starting slash
             .then(response => response.json())
             .then(data => {
                 latestRates = data;
@@ -66,7 +74,7 @@
             .catch(error => console.error('Error fetching rates:', error))
             .finally(() => {
                 spinner.classList.add('hidden');
-                list.classList.remove('opacity-50'); // restore
+                list.classList.remove('opacity-50');
             });
     }
 
@@ -75,10 +83,12 @@
         list.innerHTML = '';
 
         currencies.forEach(curr => {
-            const code = curr.currency;
-            const countryCode = (curr.country_code || 'UN').toLowerCase(); // flags are lowercase
-            const flagUrl = `https://flagcdn.com/w40/${countryCode}.png`; // smaller for performance
-            const symbol = curr.symbol;
+            if (curr.is_base) return; // Skip showing the base itself
+
+            const code = curr.code;
+            const countryCode = (curr.country_code || 'UN').toLowerCase();
+            const flagUrl = `https://flagcdn.com/w40/${countryCode}.png`;
+            const symbol = curr.symbol || '';
 
             const value = (latestRates[code] * amount || 0).toFixed(2);
             const rate = ((latestRates[code] || 0)).toFixed(4);
@@ -91,7 +101,7 @@
                     <img src="${flagUrl}" alt="${code}" class="w-8 h-8 rounded-full">
                     <div>
                         <div class="font-bold">${code}</div>
-                        <div class="text-gray-500 text-xs">1 AUD = ${rate} ${code}</div>
+                        <div class="text-gray-500 text-xs">1 ${baseCurrency.code} = ${rate} ${code}</div>
                     </div>
                 </div>
                 <div class="font-bold text-lg">${symbol}${value}</div>

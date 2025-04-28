@@ -16,16 +16,13 @@ class CurrencyService
         $this->baseUrl = 'https://openexchangerates.org/api/';
     }
 
-    public function getLatestRates(array $symbols, string $base = 'USD')
+    public function getLatestRates(array $symbols)
     {
-        return Cache::remember("latest_rates_{$base}", 300, function () use ($symbols, $base) {
-            $response = Http::get($this->baseUrl . 'latest.json', [
-                'app_id' => $this->apiKey,
-                'base' => $base,
-                'symbols' => implode(',', $symbols),
-            ]);
+        $response = Http::get($this->baseUrl . 'latest.json', [
+            'app_id' => $this->apiKey,
+            'symbols' => implode(',', $symbols),
+        ]);
 
-            return $response->successful() ? $response->json() : null;
-        });
+        return $response->successful() ? $response->json() : null;
     }
 }
