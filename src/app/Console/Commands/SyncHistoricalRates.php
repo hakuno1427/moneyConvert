@@ -7,7 +7,6 @@ use App\Repositories\CurrencyRepository;
 use App\Repositories\HistoricalExchangeRateRepository;
 use App\Repositories\HistoricalRateRepository;
 use App\Services\CurrencyAPIService;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SyncHistoricalRates extends Command

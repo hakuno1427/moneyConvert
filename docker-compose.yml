@@ -1,7 +1,7 @@
 services:
   web:
     image: nginx:latest
-    container_name: laravel-app-web
+    container_name: money-convert-web
     ports:
       - "8000:80"
     volumes:
@@ -14,7 +14,7 @@ services:
 
   app:
     image: php:8.4-fpm
-    container_name: laravel-app-app
+    container_name:  money-convert-app
     build:
       context: ./docker/php-fpm
       dockerfile: Dockerfile
@@ -25,7 +25,7 @@ services:
 
   db:
     image: mysql:5.7
-    container_name: laravel-app-db
+    container_name:  money-convert-db
     environment:
       MYSQL_ROOT_PASSWORD: admin@123
       MYSQL_DATABASE: laravel

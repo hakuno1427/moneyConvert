@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Console\Command;
 
-use App\Console\Commands\SyncHistoricalRates;
 use App\Models\Currency;
 use App\Models\HistoricalExchangeRate;
 use App\Repositories\CurrencyRepository;
@@ -18,21 +17,6 @@ class SyncHistoricalRatesTest extends TestCase
     protected $currencyRepository;
     protected $currencyAPIService;
     protected $exchangeRateRepository;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Mock dependencies
-        $this->currencyRepository = Mockery::mock(CurrencyRepository::class);
-        $this->currencyAPIService = Mockery::mock(CurrencyAPIService::class);
-        $this->exchangeRateRepository = Mockery::mock(HistoricalExchangeRateRepository::class);
-
-        // Bind mocks into the container
-        $this->app->instance(CurrencyRepository::class, $this->currencyRepository);
-        $this->app->instance(CurrencyAPIService::class, $this->currencyAPIService);
-        $this->app->instance(HistoricalExchangeRateRepository::class, $this->exchangeRateRepository);
-    }
 
     public function test_syncs_historical_rates_successfully()
     {
@@ -82,8 +66,7 @@ class SyncHistoricalRatesTest extends TestCase
         ]);
         $this->currencyRepository->shouldReceive('getAll')->andReturn($currencies);
 
-        for ($i=0; $i<HistoricalExchangeRate::DAYS_TO_COMPARE; $i++)
-        {
+        for ($i = 0; $i < HistoricalExchangeRate::DAYS_TO_COMPARE; $i++) {
             $this->currencyAPIService->shouldReceive('getHistoricalRates')
                 ->withArgs([Carbon::today()->subDays($i)->toDateString(), ['USD', 'EUR', 'GBP']])
                 ->andReturn([
@@ -149,6 +132,21 @@ class SyncHistoricalRatesTest extends TestCase
         $this->artisan('currency:sync-historical')
             ->expectsOutput('Base currency is not set')
             ->assertExitCode(0);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Mock dependencies
+        $this->currencyRepository = Mockery::mock(CurrencyRepository::class);
+        $this->currencyAPIService = Mockery::mock(CurrencyAPIService::class);
+        $this->exchangeRateRepository = Mockery::mock(HistoricalExchangeRateRepository::class);
+
+        // Bind mocks into the container
+        $this->app->instance(CurrencyRepository::class, $this->currencyRepository);
+        $this->app->instance(CurrencyAPIService::class, $this->currencyAPIService);
+        $this->app->instance(HistoricalExchangeRateRepository::class, $this->exchangeRateRepository);
     }
 
 }

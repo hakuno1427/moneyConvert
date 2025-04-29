@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Service;
 
 use App\Models\Currency;
 use App\Models\HistoricalExchangeRate;
@@ -8,9 +8,11 @@ use App\Repositories\CurrencyRepositoryInterface;
 use App\Repositories\HistoricalExchangeRateRepositoryInterface;
 use App\Services\CurrencyAPIService;
 use App\Services\CurrencyService;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Http\JsonResponse;
 use Mockery;
+use ReflectionClass;
 use Tests\TestCase;
 
 class CurrencyServiceTest extends TestCase
@@ -72,6 +74,17 @@ class CurrencyServiceTest extends TestCase
         $this->assertEquals(0.85, $response['EUR']);
     }
 
+    public function test_get_rates_throws_exception()
+    {
+        $this->currencyRepository
+            ->shouldReceive('getBaseCurrency')
+            ->once()
+            ->andReturnNull();
+
+        $this->expectException(Exception::class);
+        $this->currencyService->getRates();
+    }
+
     public function test_get_latest_usd_rates_fails()
     {
         $currencies = new Collection([
@@ -93,7 +106,7 @@ class CurrencyServiceTest extends TestCase
 
         $result = $this->invokeMethod($this->currencyService, 'getLatestUSDRates');
 
-        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $result);
+        $this->assertInstanceOf(JsonResponse::class, $result);
         $this->assertEquals(500, $result->getStatusCode());
     }
 
@@ -102,7 +115,7 @@ class CurrencyServiceTest extends TestCase
      */
     protected function invokeMethod(&$object, $methodName, array $parameters = [])
     {
-        $reflection = new \ReflectionClass(get_class($object));
+        $reflection = new ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
         $method->setAccessible(true);
 
@@ -144,6 +157,17 @@ class CurrencyServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('EUR', $result);
         $this->assertCount(2, $result['EUR']);
+    }
+
+    public function test_get_historical_exchange_rates_throws_exception()
+    {
+        $this->currencyRepository
+            ->shouldReceive('getBaseCurrency')
+            ->once()
+            ->andReturnNull();
+
+        $this->expectException(Exception::class);
+        $this->currencyService->getHistoricalExchangeRates();
     }
 
     protected function setUp(): void

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Currency;
 use App\Repositories\CurrencyRepositoryInterface;
 use App\Repositories\HistoricalExchangeRateRepositoryInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 
@@ -55,19 +56,25 @@ class CurrencyService
 
     /**
      * @return array
+     * @throws Exception
      */
     public function getRates(): array
     {
+        $baseCurrency = $this->currencyRepository->getBaseCurrency();
+
+        if (!isset($baseCurrency)) {
+            throw new Exception('Base currency not found.');
+        }
+
         $USDRates = $this->getLatestUSDRates();
-        $baseCurrency = $this->currencyRepository->getBaseCurrency()->code;
 
         $conversionRate = [];
         foreach ($this->currencies as $currency) {
 
-            if ($currency->code == $baseCurrency) {
+            if ($currency->code == $baseCurrency->code) {
                 continue;
             }
-            $conversionRate[$currency->code] = $USDRates[$currency->code] / $USDRates[$baseCurrency];
+            $conversionRate[$currency->code] = $USDRates[$currency->code] / $USDRates[$baseCurrency->code];
         }
 
         return $conversionRate;
@@ -76,7 +83,7 @@ class CurrencyService
     /**
      * @return JsonResponse|array
      */
-    protected function getLatestUSDRates()
+    protected function getLatestUSDRates(): JsonResponse|array
     {
         $currencies = $this->getAllCurrencies();
         $currency_codes = $currencies->pluck('code')->toArray();
@@ -106,6 +113,7 @@ class CurrencyService
 
     /**
      * @return array|null
+     * @throws Exception
      */
     public function getHistoricalExchangeRates(): ?array
     {
@@ -113,9 +121,13 @@ class CurrencyService
             return $this->historicalExchangeRates;
         }
 
-        $baseCurrency = $this->currencyRepository->getBaseCurrency()->code;
+        $baseCurrency = $this->currencyRepository->getBaseCurrency();
 
-        $historicalExchangeRates = $this->exchangeRateRepository->getRatesFromBaseCurrency($baseCurrency);
+        if (!isset($baseCurrency)) {
+            throw new Exception('Base currency not found.');
+        }
+
+        $historicalExchangeRates = $this->exchangeRateRepository->getRatesFromBaseCurrency($baseCurrency->code);
 
         $groupedRates = $historicalExchangeRates->groupBy('to_code');
 

@@ -5,4 +5,3 @@ use App\Http\Controllers\CurrencyController;
 
 Route::get('/', [CurrencyController::class, 'index']);
 Route::get('getRates', [CurrencyController::class, 'getRates']);
-Route::get('/api/history/{currency}', [CurrencyController::class, 'history']);

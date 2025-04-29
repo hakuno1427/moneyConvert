@@ -1,6 +1,6 @@
 <?php
 
-namespace Services;
+namespace Test\Services;
 
 use App\Services\CurrencyAPIService;
 use Illuminate\Support\Facades\Config;

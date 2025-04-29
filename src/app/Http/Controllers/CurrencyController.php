@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\CurrencyService;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class CurrencyController extends Controller
 {
@@ -27,17 +26,22 @@ class CurrencyController extends Controller
     }
 
     /**
-     * @return \Illuminate\View\View
+     * @return View|JsonResponse
      */
     public function index()
     {
-        $currencies = $this->currencyService->getAllCurrencies();
-        $historicalRates = $this->getHistoricalRates();
-        return view('index', compact('currencies', 'historicalRates'));
+        try {
+            $currencies = $this->currencyService->getAllCurrencies();
+            $historicalRates = $this->getHistoricalRates();
+            return view('index', compact('currencies', 'historicalRates'));
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * @return array|null
+     * @throws Exception
      */
     public function getHistoricalRates(): ?array
     {
@@ -46,6 +50,7 @@ class CurrencyController extends Controller
 
     /**
      * @return JsonResponse
+     * @throws Exception
      */
     public function getRates()
     {
