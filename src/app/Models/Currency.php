@@ -6,12 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class Currency extends Model
 {
-    protected $primaryKey = 'code';
-    public $incrementing = false; // Important! No auto-increment
-    protected $keyType = 'string'; // Primary key is a string
+    /**
+     * @var bool
+     */
+    public $incrementing = false;
 
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'code';
+
+    /**
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * @var string[]
+     */
     protected $fillable = ['code', 'country_code', 'symbol', 'is_base'];
 
+    /**
+     * Disable is_base in other currency when a new base currency is saved
+     * @return void
+     */
     protected static function booted()
     {
         static::saving(function ($currency) {

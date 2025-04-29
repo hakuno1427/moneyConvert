@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\CurrencyRepository;
+use App\Repositories\CurrencyRepositoryInterface;
+use App\Repositories\HistoricalExchangeRateRepository;
+use App\Repositories\HistoricalExchangeRateRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(CurrencyRepositoryInterface::class, CurrencyRepository::class);
+        $this->app->bind(HistoricalExchangeRateRepositoryInterface::class, HistoricalExchangeRateRepository::class);
     }
 
     /**
