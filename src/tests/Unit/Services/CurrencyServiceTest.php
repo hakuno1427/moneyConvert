@@ -67,12 +67,9 @@ class CurrencyServiceTest extends TestCase
 
         $response = $this->currencyService->getRates();
 
-        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $response);
-
-        $data = $response->getData(true);
-
-        $this->assertArrayHasKey('EUR', $data);
-        $this->assertEquals(0.85, $data['EUR']);
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('EUR', $response);
+        $this->assertEquals(0.85, $response['EUR']);
     }
 
     public function test_get_latest_usd_rates_fails()

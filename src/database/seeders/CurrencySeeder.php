@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Currency;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
-use App\Models\Currency;
 
 class CurrencySeeder extends Seeder
 {

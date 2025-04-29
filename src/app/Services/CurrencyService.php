@@ -54,24 +54,23 @@ class CurrencyService
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getRates()
+    public function getRates(): array
     {
         $USDRates = $this->getLatestUSDRates();
-
-        $usdToBase = $USDRates[$this->currencyRepository->getBaseCurrency()->code];
+        $baseCurrency = $this->currencyRepository->getBaseCurrency()->code;
 
         $conversionRate = [];
         foreach ($this->currencies as $currency) {
 
-            if ($currency->code == $usdToBase) {
+            if ($currency->code == $baseCurrency) {
                 continue;
             }
-            $conversionRate[$currency->code] = $USDRates[$currency->code] / $usdToBase;
+            $conversionRate[$currency->code] = $USDRates[$currency->code] / $USDRates[$baseCurrency];
         }
 
-        return response()->json($conversionRate);
+        return $conversionRate;
     }
 
     /**

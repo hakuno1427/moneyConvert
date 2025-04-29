@@ -55,6 +55,12 @@ class SyncHistoricalRates extends Command
     public function handle()
     {
         $baseCurrency = $this->currencyRepository->getBaseCurrency();
+
+        if ($baseCurrency == null) {
+            $this->info('Base currency is not set');
+            return 0;
+        }
+
         $today = now()->startOfDay();
 
         $lastSyncedDate = $this->exchangeRateRepository->getLastSyncedDate($baseCurrency->code)

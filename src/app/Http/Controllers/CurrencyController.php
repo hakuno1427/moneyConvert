@@ -49,6 +49,6 @@ class CurrencyController extends Controller
      */
     public function getRates()
     {
-        return $this->currencyService->getRates();
+        return response()->json($this->currencyService->getRates());
     }
 }
