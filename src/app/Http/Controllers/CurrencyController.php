@@ -20,7 +20,7 @@ class CurrencyController extends Controller
      * @param CurrencyService $currencyService
      */
     public function __construct(
-        CurrencyService                  $currencyService,
+        CurrencyService $currencyService,
     )
     {
         $this->currencyService = $currencyService;
@@ -37,18 +37,18 @@ class CurrencyController extends Controller
     }
 
     /**
-     * @return JsonResponse
-     */
-    public function getRates()
-    {
-        return $this->currencyService->getRates();
-    }
-
-    /**
      * @return array|null
      */
     public function getHistoricalRates(): ?array
     {
         return $this->currencyService->getHistoricalExchangeRates();
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function getRates()
+    {
+        return $this->currencyService->getRates();
     }
 }

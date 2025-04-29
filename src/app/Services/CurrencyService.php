@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use App\Models\Currency;
-use App\Models\HistoricalExchangeRate;
-use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\CurrencyRepositoryInterface;
 use App\Repositories\HistoricalExchangeRateRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 
 class CurrencyService
@@ -44,28 +43,14 @@ class CurrencyService
      * @param CurrencyAPIService $currencyAPIService
      */
     public function __construct(
-        CurrencyRepositoryInterface $currencyRepository,
+        CurrencyRepositoryInterface               $currencyRepository,
         HistoricalExchangeRateRepositoryInterface $exchangeRateRepository,
-        CurrencyAPIService $currencyAPIService
+        CurrencyAPIService                        $currencyAPIService
     )
     {
         $this->currencyRepository = $currencyRepository;
         $this->exchangeRateRepository = $exchangeRateRepository;
         $this->currencyApiService = $currencyAPIService;
-    }
-
-    /**
-     * @return Collection<Currency>
-     */
-    public function getAllCurrencies(): Collection
-    {
-        if ($this->currencies !== null) {
-            return $this->currencies;
-        }
-
-        $this->currencies = $this->currencyRepository->getAll();
-
-        return $this->currencies;
     }
 
     /**
@@ -89,7 +74,6 @@ class CurrencyService
         return response()->json($conversionRate);
     }
 
-
     /**
      * @return JsonResponse|array
      */
@@ -108,6 +92,20 @@ class CurrencyService
     }
 
     /**
+     * @return Collection<Currency>
+     */
+    public function getAllCurrencies(): Collection
+    {
+        if ($this->currencies !== null) {
+            return $this->currencies;
+        }
+
+        $this->currencies = $this->currencyRepository->getAll();
+
+        return $this->currencies;
+    }
+
+    /**
      * @return array|null
      */
     public function getHistoricalExchangeRates(): ?array
@@ -118,10 +116,7 @@ class CurrencyService
 
         $baseCurrency = $this->currencyRepository->getBaseCurrency()->code;
 
-        $historicalExchangeRates = HistoricalExchangeRate::where('from_code', $baseCurrency)
-            ->whereDate('date', '>=', now()->subDays(14))
-            ->orderBy('date')
-            ->get();
+        $historicalExchangeRates = $this->exchangeRateRepository->getRatesFromBaseCurrency($baseCurrency);
 
         $groupedRates = $historicalExchangeRates->groupBy('to_code');
 

@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Repositories;
+
 use App\Models\HistoricalExchangeRate;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 interface HistoricalExchangeRateRepositoryInterface
 {
@@ -24,4 +26,10 @@ interface HistoricalExchangeRateRepositoryInterface
      * @return Carbon|null
      */
     public function getLastSyncedDate($fromCode): ?Carbon;
+
+    /**
+     * @param string $baseCurrency
+     * @return Collection
+     */
+    public function getRatesFromBaseCurrency(string $baseCurrency): Collection;
 }

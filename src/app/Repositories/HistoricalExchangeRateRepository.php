@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\HistoricalExchangeRate;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class HistoricalExchangeRateRepository implements HistoricalExchangeRateRepositoryInterface
 {
@@ -37,5 +38,18 @@ class HistoricalExchangeRateRepository implements HistoricalExchangeRateReposito
             ->first();
 
         return $lastRecord ? Carbon::parse($lastRecord->date) : null;
+    }
+
+
+    /**
+     * @param string $baseCurrency
+     * @return Collection
+     */
+    public function getRatesFromBaseCurrency(string $baseCurrency): Collection
+    {
+        return HistoricalExchangeRate::where('from_code', $baseCurrency)
+            ->whereDate('date', '>=', now()->subDays(HistoricalExchangeRate::DAYS_TO_COMPARE))
+            ->orderBy('date')
+            ->get();
     }
 }

@@ -38,7 +38,7 @@ class SyncHistoricalRates extends Command
      */
     public function __construct(
         CurrencyRepository               $currencyRepository,
-        CurrencyAPIService                  $currencyAPIService,
+        CurrencyAPIService               $currencyAPIService,
         HistoricalExchangeRateRepository $exchangeRateRepository
     )
     {

@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HistoricalExchangeRate extends Model
 {
-    /**
-     * /** @use HasFactory<UserFactory>
+    /** @use HasFactory<UserFactory>
      */
     use HasFactory;
 
